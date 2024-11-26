@@ -118,21 +118,29 @@ exports.updateUser = async (req, res, next) => {
 exports.deleteUser = async (req, res, next) => {
     try {
         const { id_usuario } = req.params;
-        console.log("ID recibido para eliminación:", id_usuario); // Agrega este log
 
+        // Validación del ID
         if (!id_usuario) {
-            throw { status: 400, message: 'El campo "id_usuario" es obligatorio para eliminar un usuario.' };
+            return res.status(400).json({ success: false, message: 'El campo "id_usuario" es obligatorio para eliminar un usuario.' });
         }
 
+        // Intentar eliminar el usuario
         const { data, error } = await supabase.from('usuario').delete().eq('id_usuario', id_usuario);
-        if (error) throw error;
 
-        if (data.length === 0) {
-            throw { status: 404, message: 'No se encontró el usuario con el id especificado.' };
+        // Manejo de errores de Supabase
+        if (error) {
+            return res.status(500).json({ success: false, message: 'Error en la base de datos: ' + error.message });
         }
 
-        res.status(200).json({ success: true, message: 'Usuario eliminado exitosamente.' });
+        // Verificar si se encontró y eliminó un usuario
+        if (!data || data.length === 0) {
+            return res.status(404).json({ success: false, message: 'No se encontró el usuario con el id especificado.' });
+        }
+
+        // Respuesta exitosa
+        return res.status(200).json({ success: true, message: 'Usuario eliminado exitosamente.' });
     } catch (err) {
+        // Pasar errores inesperados al middleware de manejo de errores
         next(err);
     }
 };

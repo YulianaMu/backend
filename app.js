@@ -15,7 +15,6 @@ app.use(express.json());
 // Rutas
 app.use('/users', userRoutes);
 app.use('/products', productRoutes);
-
 // Middleware de manejo de errores
 app.use(errorHandler);
 
